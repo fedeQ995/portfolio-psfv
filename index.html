@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Federico Quiroga — Project Controls Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --night:  #0b1929;
+  --night2: #112240;
+  --paper:  #f1f5f9;
+  --card:   #ffffff;
+  --green:  #16a34a;
+  --greenl: #dcfce7;
+  --amber:  #d97706;
+  --amberl: #fef3c7;
+  --red:    #dc2626;
+  --redl:   #fee2e2;
+  --blue:   #2563eb;
+  --bluel:  #dbeafe;
+  --gray:   #64748b;
+  --border: #e2e8f0;
+  --text:   #0f172a;
+  --sans:   'DM Sans', sans-serif;
+  --mono:   'DM Mono', monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);color:var(--text);background:var(--paper);font-size:14px;line-height:1.5}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:rgba(11,25,41,0.97);backdrop-filter:blur(8px);padding:0 40px;display:flex;align-items:center;gap:32px;height:52px;border-bottom:1px solid rgba(255,255,255,0.07)}
+.nav-logo{font-weight:600;color:#fff;font-size:14px;margin-right:auto}
+.nav-logo span{color:#4ade80}
+nav a{color:#94a3b8;font-size:13px;text-decoration:none;padding:4px 0;border-bottom:2px solid transparent;transition:all .2s}
+nav a:hover,nav a.active{color:#fff;border-color:#4ade80}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,var(--night) 0%,var(--night2) 100%);padding:64px 40px 52px;position:relative;overflow:hidden}
+.hero::after{content:'';position:absolute;top:-80px;right:-80px;width:400px;height:400px;background:radial-gradient(circle,rgba(74,222,128,.1) 0%,transparent 65%);pointer-events:none}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.25);border-radius:20px;padding:4px 12px;font-size:11.5px;color:#4ade80;font-weight:500;letter-spacing:.5px;margin-bottom:20px}
+.hero-badge::before{content:'';width:6px;height:6px;background:#4ade80;border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+h1{font-size:clamp(28px,4vw,46px);font-weight:300;color:#fff;line-height:1.15;margin-bottom:10px;max-width:820px}
+h1 strong{font-weight:700}
+.hero-sub{font-size:15px;color:#cbd5e1;margin-bottom:36px;max-width:720px}
+.hero-pills{display:flex;gap:10px;flex-wrap:wrap}
+.pill{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:10px 16px;font-size:13px;color:#cbd5e1;text-decoration:none;transition:all .2s;cursor:pointer}
+.pill:hover{background:rgba(74,222,128,.1);border-color:rgba(74,222,128,.3);color:#fff}
+.pill-icon{margin-right:6px}
+
+/* SECTION */
+.section{padding:48px 40px;max-width:1200px;margin:0 auto}
+.section-sep{border:none;border-top:1px solid var(--border);margin:0}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:6px}
+h2{font-size:clamp(20px,2.5vw,26px);font-weight:600;margin-bottom:6px}
+.section-desc{font-size:14px;color:var(--gray);max-width:600px;margin-bottom:28px}
+.intent-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:20px;align-items:stretch}
+.intent-panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px}
+.intent-panel h3{font-size:17px;font-weight:600;margin-bottom:8px}
+.intent-panel p{font-size:14px;color:var(--gray);margin-bottom:16px}
+.proof-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.proof-item{border:1px solid var(--border);border-radius:10px;padding:12px;background:#f8fafc}
+.proof-item strong{display:block;font-size:13px;margin-bottom:4px}
+.proof-item span{display:block;font-size:12px;color:var(--gray)}
+.value-list{display:grid;gap:10px;margin-top:14px}
+.value-item{display:flex;gap:10px;align-items:flex-start;border-bottom:1px solid #f1f5f9;padding-bottom:10px}
+.value-item:last-child{border-bottom:none;padding-bottom:0}
+.value-num{font-family:var(--mono);font-size:12px;color:var(--green);font-weight:500;min-width:26px}
+.value-item strong{display:block;font-size:13px}
+.value-item span{display:block;font-size:12px;color:var(--gray);margin-top:2px}
+.demo-note{margin-top:16px;border-left:3px solid var(--green);padding:10px 12px;background:#f0fdf4;border-radius:0 8px 8px 0;color:#166534;font-size:12.5px}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.card-head{padding:14px 18px;background:#f8fafc;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.card-head h3{font-size:13px;font-weight:600;color:var(--text)}
+.card-body{padding:18px}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:500;border-radius:5px;padding:2px 8px}
+.b-green{background:var(--greenl);color:#15803d}
+.b-amber{background:var(--amberl);color:#92400e}
+.b-red{background:var(--redl);color:#991b1b}
+.b-blue{background:var(--bluel);color:#1d4ed8}
+.b-gray{background:#f1f5f9;color:#475569}
+
+/* FORMS */
+.form-grid{display:grid;gap:10px}
+.form-row{display:flex;flex-direction:column;gap:4px}
+.form-row label{font-size:12px;font-weight:500;color:var(--gray)}
+.form-row input,.form-row select,.form-row textarea{font-family:var(--sans);font-size:13px;border:1px solid var(--border);border-radius:7px;padding:7px 10px;color:var(--text);outline:none;transition:border-color .15s;background:#fff}
+.form-row input:focus,.form-row select:focus{border-color:var(--green)}
+.btn{font-family:var(--sans);font-size:13px;font-weight:500;border:none;border-radius:7px;padding:8px 16px;cursor:pointer;transition:opacity .15s}
+.btn:hover{opacity:.85}
+.btn-green{background:var(--green);color:#fff}
+.btn-ghost{background:var(--border);color:var(--gray)}
+.btn-sm{padding:5px 11px;font-size:12px}
+
+/* TABLES */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+thead th{font-size:11.5px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:.7px;padding:9px 14px;text-align:left;background:#f8fafc;border-bottom:1px solid var(--border);white-space:nowrap}
+tbody tr{border-bottom:1px solid #f1f5f9;transition:background .12s}
+tbody tr:hover{background:#f8fafc}
+tbody tr:last-child{border-bottom:none}
+tbody td{padding:9px 14px;font-size:13px;vertical-align:middle}
+
+/* PROGRESS */
+.pbar{height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;min-width:70px}
+.pfill{height:100%;border-radius:3px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.pg-green{background:var(--green)}
+.pg-amber{background:var(--amber)}
+.pg-red{background:var(--red)}
+.pval{font-family:var(--mono);font-size:12px;color:var(--text);white-space:nowrap}
+
+/* KPI ROW */
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:20px}
+.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;text-align:center}
+.kpi-v{font-family:var(--mono);font-size:24px;font-weight:500;line-height:1}
+.kpi-l{font-size:11px;color:var(--gray);margin-top:4px}
+
+/* ═══════ MODULE 1: PARK MAP + EDT ═══════ */
+.park-layout{display:grid;grid-template-columns:1fr 360px;gap:20px;align-items:start}
+.park-map-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
+.map-controls{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.map-controls select{font-family:var(--sans);font-size:12.5px;border:1px solid var(--border);border-radius:6px;padding:6px 10px;outline:none;background:#fff;color:var(--text)}
+.map-title{font-size:12px;font-weight:600;color:var(--gray);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px}
+#parkSVG{width:100%;border-radius:8px}
+.map-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px}
+.leg{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--gray)}
+.leg-sq{width:12px;height:12px;border-radius:3px}
+
+/* Bloque detail panel */
+.detail-panel{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.detail-header{padding:14px 18px;background:var(--night);color:#fff}
+.detail-header h4{font-size:14px;font-weight:600}
+.detail-header p{font-size:12px;color:#64748b;margin-top:2px}
+.detail-body{padding:16px 18px}
+.sys-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f1f5f9}
+.sys-row:last-child{border-bottom:none}
+.sys-name{font-size:13px;font-weight:500}
+.sys-pct{font-family:var(--mono);font-size:12px;color:var(--gray)}
+.sys-bar{width:80px}
+
+/* Task accordion */
+.task-list{margin-top:10px}
+.task-item{padding:6px 0;border-bottom:1px solid #f1f5f9;font-size:12.5px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.task-item:last-child{border-bottom:none}
+.task-name{color:var(--text);flex:1}
+.task-cb{width:16px;height:16px;accent-color:var(--green);cursor:pointer}
+.lib-btn{font-family:var(--sans);font-size:11px;font-weight:500;padding:3px 9px;border-radius:5px;border:none;cursor:pointer;white-space:nowrap}
+.lib-ready{background:var(--greenl);color:#15803d}
+.lib-sent{background:#f0fdf4;color:#166534;cursor:default}
+.lib-locked{background:#f1f5f9;color:#94a3b8;cursor:not-allowed}
+
+/* ═══════ MODULE 2: STOCK ═══════ */
+.stock-layout{display:grid;grid-template-columns:1fr 300px;gap:20px;align-items:start}
+
+/* Sparkline */
+.spark{display:flex;align-items:flex-end;gap:2px;height:28px}
+.spark-bar{width:6px;border-radius:2px 2px 0 0;background:var(--bluel);flex-shrink:0}
+
+/* ═══════ MODULE 3: ANALYTICS ═══════ */
+.analytics-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.chart-wrap{position:relative;height:200px}
+canvas{width:100%!important}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--night2);color:#fff;font-size:13px;padding:12px 18px;border-radius:9px;border-left:3px solid #4ade80;box-shadow:0 8px 24px rgba(0,0,0,.25);opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;z-index:999;max-width:300px}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  nav{padding:0 20px;gap:16px}
+  .hero,.section{padding-left:20px;padding-right:20px}
+  .park-layout,.stock-layout,.analytics-grid,.intent-grid,.proof-list{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">FQ <span>·</span> Project Controls</div>
+  <a href="#enfoque">Enfoque</a>
+  <a href="#parque">Parque & EDT</a>
+  <a href="#stock">Stock</a>
+  <a href="#analytics">Analytics</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">Demo interactivo · Energía solar</div>
+  <h1><strong>Federico Quiroga</strong> · control operativo para proyectos solares que necesitan ver avance real</h1>
+  <p class="hero-sub">Portafolio técnico aplicado a PSFV: mapa físico del parque, EDT por bloque, liberación a Calidad, stock de componentes críticos y reporting ejecutivo para PM/Gerencia.</p>
+  <div class="hero-pills">
+    <a class="pill" href="#enfoque"><span class="pill-icon">🎯</span>Qué estoy demostrando</a>
+    <a class="pill" href="#parque"><span class="pill-icon">🗺️</span>Mapa del parque + EDT</a>
+    <a class="pill" href="#stock"><span class="pill-icon">📦</span>Control de stock</a>
+    <a class="pill" href="#analytics"><span class="pill-icon">📊</span>Analytics & reporting</a>
+    <a class="pill" href="mailto:fedenquiroga@gmail.com"><span class="pill-icon">✉️</span>Contacto</a>
+  </div>
+</div>
+
+<hr class="section-sep">
+
+<!-- ══════════════════════════════════════════
+     ENFOQUE DE POSTULACIÓN
+══════════════════════════════════════════ -->
+<section id="enfoque" class="section">
+  <div class="eyebrow">Caso aplicado para postulación</div>
+  <h2>Qué quiero mostrar con esta demo</h2>
+  <p class="section-desc">No es una herramienta productiva ni usa datos reales. Es una muestra práctica de cómo pienso un problema de obra solar y cómo lo convertiría en seguimiento, trazabilidad y reporte para equipos de campo, calidad y gerencia.</p>
+
+  <div class="intent-grid">
+    <div class="intent-panel">
+      <h3>Habilidades que se ven en la demo</h3>
+      <p>La intención es que el recorrido muestre criterio operativo, no solo diseño visual.</p>
+      <div class="proof-list">
+        <div class="proof-item">
+          <strong>Estructuración EDT</strong>
+          <span>Zona, bloque, inversor, string, tracker, sistema, subsistema y tarea.</span>
+        </div>
+        <div class="proof-item">
+          <strong>Seguimiento de avance</strong>
+          <span>Porcentaje por tarea que impacta en bloque, sistema y proyecto.</span>
+        </div>
+        <div class="proof-item">
+          <strong>Calidad conectada a campo</strong>
+          <span>Trigger de liberación PIE solo cuando la ejecución está completa.</span>
+        </div>
+        <div class="proof-item">
+          <strong>Stock trazable</strong>
+          <span>Ingresos, egresos, bajas, mínimos y alertas de componentes críticos.</span>
+        </div>
+        <div class="proof-item">
+          <strong>Visualización ejecutiva</strong>
+          <span>Mapa SVG, KPIs y gráficos para lectura rápida de PM/Gerencia.</span>
+        </div>
+        <div class="proof-item">
+          <strong>Automatización simple</strong>
+          <span>Reglas claras para reducir seguimiento manual y evitar datos aislados.</span>
+        </div>
+      </div>
+      <div class="demo-note">Datos simulados y generados para demo. La lógica representa un caso realista de seguimiento de un PSFV.</div>
+    </div>
+
+    <div class="intent-panel">
+      <h3>Mi aporte al equipo</h3>
+      <p>Busco aportar una mirada mixta: calidad en obra, orden de procesos, análisis de datos y herramientas simples para que lo que pasa en campo llegue claro a la toma de decisiones.</p>
+      <div class="value-list">
+        <div class="value-item">
+          <div class="value-num">01</div>
+          <div><strong>Traducir campo en datos útiles</strong><span>Convertir tareas, avances, hallazgos y consumos en información accionable.</span></div>
+        </div>
+        <div class="value-item">
+          <div class="value-num">02</div>
+          <div><strong>Ordenar el control de calidad</strong><span>Vincular EDT, documentos, evidencias y liberaciones sin perder trazabilidad.</span></div>
+        </div>
+        <div class="value-item">
+          <div class="value-num">03</div>
+          <div><strong>Diseñar tableros entendibles</strong><span>Mostrar avance analítico y visual para que PM y gerencia vean el estado real del parque.</span></div>
+        </div>
+        <div class="value-item">
+          <div class="value-num">04</div>
+          <div><strong>Detectar riesgos operativos</strong><span>Stock crítico, desvíos abiertos, tareas bloqueadas y puntos que frenan certificación.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="section-sep">
+
+<!-- ══════════════════════════════════════════
+     MÓDULO 1: MAPA DEL PARQUE + EDT
+══════════════════════════════════════════ -->
+<section id="parque" class="section">
+  <div class="eyebrow">Módulo 1</div>
+  <h2>Mapa del parque + EDT por bloque</h2>
+  <p class="section-desc">Cada bloque del PSFV muestra su avance por Zona → Bloque → Inversor → String → Tracker. Al hacer click se despliega el detalle por sistema, subsistema y tareas, con trigger de liberación a Calidad cuando la ejecución llega al 100%.</p>
+
+  <div class="park-layout">
+    <!-- Mapa SVG -->
+    <div class="park-map-wrap">
+      <div class="map-controls">
+        <select id="mapProject" onchange="buildPark()">
+          <option value="PALO">Proyecto PALO</option>
+          <option value="CORD">Proyecto CORD</option>
+          <option value="LR">Proyecto LR</option>
+        </select>
+        <select id="mapView" onchange="buildPark()">
+          <option value="overall">Vista: avance general</option>
+          <option value="civil">Vista: obras civiles</option>
+          <option value="tracker">Vista: trackers / mecánico</option>
+          <option value="electrico">Vista: eléctrico</option>
+        </select>
+      </div>
+      <div class="map-title" id="mapTitle">PSFV PALO — avance general por bloque</div>
+      <svg id="parkSVG" viewBox="0 0 680 380"></svg>
+      <div class="map-legend">
+        <div class="leg"><div class="leg-sq" style="background:#16a34a"></div>≥ 80% completado</div>
+        <div class="leg"><div class="leg-sq" style="background:#d97706"></div>40–79%</div>
+        <div class="leg"><div class="leg-sq" style="background:#dc2626"></div>con desvíos</div>
+        <div class="leg"><div class="leg-sq" style="background:#94a3b8"></div>&lt; 40% / pendiente</div>
+      </div>
+    </div>
+
+    <!-- Panel de detalle del bloque -->
+    <div class="detail-panel" id="detailPanel">
+      <div class="detail-header">
+        <h4 id="detailTitle">Seleccioná un bloque</h4>
+        <p id="detailSub">Click en cualquier bloque del mapa</p>
+      </div>
+      <div class="detail-body" id="detailBody">
+        <p style="color:var(--gray);font-size:13px;padding:20px 0;text-align:center">→ Hacé click en un bloque para ver el detalle</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="section-sep">
+
+<!-- ══════════════════════════════════════════
+     MÓDULO 2: STOCK
+══════════════════════════════════════════ -->
+<section id="stock" class="section">
+  <div class="eyebrow">Módulo 2</div>
+  <h2>Control de stock — main components</h2>
+  <p class="section-desc">Trazabilidad de ingresos, egresos y bajas con alertas de stock mínimo. Registro de cada movimiento con responsable, motivo y fecha.</p>
+
+  <div class="kpi-row" id="stockKPIs"></div>
+
+  <div class="stock-layout">
+    <div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-head">
+          <h3>Movimientos</h3>
+          <div style="margin-left:auto;display:flex;gap:8px">
+            <select id="stockFilterTipo" onchange="renderStock()" style="font-family:var(--sans);font-size:12px;border:1px solid var(--border);border-radius:6px;padding:4px 8px;outline:none;background:#fff">
+              <option value="">Todos</option>
+              <option value="Ingreso">Ingresos</option>
+              <option value="Egreso">Egresos</option>
+              <option value="Baja">Bajas</option>
+            </select>
+            <input type="text" id="stockSearch" placeholder="Buscar…" oninput="renderStock()" style="font-family:var(--sans);font-size:12px;border:1px solid var(--border);border-radius:6px;padding:4px 10px;outline:none;width:140px">
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>Material</th><th>Tipo</th><th style="text-align:right">Cant.</th>
+              <th>Saldo</th><th>Estado</th><th>Resp.</th><th>Fecha</th>
+            </tr></thead>
+            <tbody id="stockBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Stock actual por material -->
+      <div class="card">
+        <div class="card-head"><h3>Saldo actual por material</h3></div>
+        <div class="card-body">
+          <div id="stockBars"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel de carga -->
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="card">
+        <div class="card-head"><h3>Registrar movimiento</h3></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="form-row">
+              <label>Material</label>
+              <select id="inMat">
+                <option>Módulo FV 550W</option>
+                <option>Inversor 110kW</option>
+                <option>Cable solar 4mm²</option>
+                <option>Cable BT 95mm²</option>
+                <option>Cable MT 35mm²</option>
+                <option>Conector MC4</option>
+                <option>Componente tracker</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label>Tipo</label>
+              <select id="inTipo" onchange="toggleMotivo()">
+                <option value="Ingreso">Ingreso</option>
+                <option value="Egreso">Egreso</option>
+                <option value="Baja">Baja / pérdida</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label>Cantidad</label>
+              <input type="number" id="inQty" placeholder="0" min="1">
+            </div>
+            <div class="form-row">
+              <label>Responsable</label>
+              <input type="text" id="inResp" placeholder="Nombre">
+            </div>
+            <div class="form-row" id="motivoRow" style="display:none">
+              <label>Motivo de baja</label>
+              <input type="text" id="inMotivo" placeholder="Ej: deterioro en campo">
+            </div>
+            <button class="btn btn-green" onclick="addStock()">Registrar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alertas -->
+      <div class="card">
+        <div class="card-head"><h3>⚠ Alertas de stock</h3></div>
+        <div class="card-body" id="alertas"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="section-sep">
+
+<!-- ══════════════════════════════════════════
+     MÓDULO 3: ANALYTICS
+══════════════════════════════════════════ -->
+<section id="analytics" class="section">
+  <div class="eyebrow">Módulo 3</div>
+  <h2>Analytics & reporting</h2>
+  <p class="section-desc">Vista ejecutiva: avance físico por proyecto y sistema, evolución semanal del avance global y distribución de hallazgos por categoría.</p>
+
+  <div class="kpi-row" style="margin-bottom:24px" id="analyticsKPIs"></div>
+
+  <div class="analytics-grid">
+    <div class="card">
+      <div class="card-head"><h3>Avance por sistema — PALO</h3></div>
+      <div class="card-body">
+        <canvas id="chartSistemas" height="180"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Evolución semanal del avance</h3></div>
+      <div class="card-body">
+        <canvas id="chartSemanal" height="180"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Hallazgos por categoría</h3></div>
+      <div class="card-body">
+        <canvas id="chartHallazgos" height="180"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Avance por bloque — todos los proyectos</h3></div>
+      <div class="card-body" id="blockTable"></div>
+    </div>
+  </div>
+</section>
+
+<footer style="background:var(--night);padding:28px 40px;text-align:center">
+  <p style="font-size:13px;color:#475569">Federico Quiroga · <a href="mailto:fedenquiroga@gmail.com" style="color:#4ade80;text-decoration:none">fedenquiroga@gmail.com</a> · La Rioja, Argentina</p>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+<script>
+// ══════════════════════════════════════
+// DATA MODEL
+// ══════════════════════════════════════
+
+// Estructura del parque: 4 bloques × 4 inversores × sistemas
+const SYSTEMS = ['Obras civiles','Trackers / Mecánico','Eléctrico BT','Eléctrico MT'];
+const SUBSYSTEMS = {
+  'Obras civiles':       ['Desbroce y nivelación','Fundaciones CTs','Viales y accesos','Cerco perimetral'],
+  'Trackers / Mecánico': ['Hincado de pilotes','Montaje estructura','Colocación módulos FV','Puesta a tierra mec.'],
+  'Eléctrico BT':        ['Tendido cable solar','Conexión strings','Cableado BT','Puesta a tierra BT'],
+  'Eléctrico MT':        ['Instalación inversores','Cableado MT','Conexión CT','Pruebas y comisionado'],
+};
+
+// Generar estado por proyecto / bloque / sistema / subsistema / tarea
+function randPct(base, spread=20){ return Math.min(100, Math.max(0, base + (Math.random()-.5)*spread)); }
+function stableOffset(key, spread=14){
+  let hash = 0;
+  for(let i=0;i<key.length;i++) hash = ((hash << 5) - hash + key.charCodeAt(i)) | 0;
+  return (Math.abs(hash) % (spread * 2 + 1)) - spread;
+}
+function mkBlockData(avBase){
+  const data = {};
+  SYSTEMS.forEach(sys => {
+    data[sys] = {};
+    SUBSYSTEMS[sys].forEach((sub,si) => {
+      const subPct = randPct(avBase - si*8);
+      const tasks = [
+        { name:'Preparación y replanteo', pct: Math.round(randPct(subPct+10)), doc:'IT-'+sys.slice(0,3).toUpperCase()+'-00'+(si*4+1)+'.pdf', libState: 'pending' },
+        { name:'Ejecución', pct: Math.round(randPct(subPct)), doc:'IT-'+sys.slice(0,3).toUpperCase()+'-00'+(si*4+2)+'.pdf', libState: 'pending' },
+        { name:'Verificación en campo', pct: Math.round(randPct(subPct-10)), doc:'RS-'+sys.slice(0,3).toUpperCase()+'-00'+(si*4+3)+'.pdf', libState: 'pending' },
+        { name:'Liberación de calidad (PIE)', pct: 0, doc:'', libState: 'locked' },
+      ];
+      if(tasks.slice(0,3).every(t=>t.pct>=100)) tasks[3].libState = 'ready';
+      data[sys][sub] = { pct: Math.round(subPct), desvio: Math.random() < 0.012 && avBase < 65, tasks };
+    });
+  });
+  return data;
+}
+
+const PROJECTS = {
+  PALO: {
+    label:'PSFV PALO', blocks:6, cols:3,
+    data: Object.fromEntries(Array.from({length:6},(_,i)=>[`B${i+1}`,mkBlockData(55+i*5)]))
+  },
+  CORD: {
+    label:'PSFV CORD', blocks:4, cols:2,
+    data: Object.fromEntries(Array.from({length:4},(_,i)=>[`B${i+1}`,mkBlockData(30+i*12)]))
+  },
+  LR: {
+    label:'PSFV LR', blocks:8, cols:4,
+    data: Object.fromEntries(Array.from({length:8},(_,i)=>[`B${i+1}`,mkBlockData(20+i*8)]))
+  },
+};
+
+function subsystemPct(subdata){
+  return Math.round(subdata.tasks.slice(0,3).reduce((a,t)=>a+t.pct,0)/3);
+}
+function blockOverallPct(blockData){
+  const vals = SYSTEMS.flatMap(s=>Object.values(blockData[s]).map(sub=>subsystemPct(sub)));
+  return Math.round(vals.reduce((a,b)=>a+b,0)/vals.length);
+}
+function sysPct(blockData, sys){
+  const vals = Object.values(blockData[sys]).map(s=>subsystemPct(s));
+  return Math.round(vals.reduce((a,b)=>a+b,0)/vals.length);
+}
+function electricPct(blockData){
+  return Math.round((sysPct(blockData,'Eléctrico BT') + sysPct(blockData,'Eléctrico MT')) / 2);
+}
+function blockHasDesvio(blockData){
+  return SYSTEMS.some(sys=>Object.values(blockData[sys]).some(sub=>sub.desvio));
+}
+function pctColor(pct, hasDesvio=false){
+  if(hasDesvio) return '#dc2626';
+  if(pct>=80) return '#16a34a';
+  if(pct>=40) return '#d97706';
+  return '#94a3b8';
+}
+
+let selectedBlock = null;
+let currentProject = 'PALO';
+
+// ══════════════════════════════════════
+// PARK MAP
+// ══════════════════════════════════════
+function buildPark(){
+  const projKey = document.getElementById('mapProject').value;
+  const viewKey = document.getElementById('mapView').value;
+  currentProject = projKey;
+  const proj = PROJECTS[projKey];
+  document.getElementById('mapTitle').textContent = proj.label + ' — ' + document.getElementById('mapView').selectedOptions[0].text.replace('Vista: ','');
+
+  const svg = document.getElementById('parkSVG');
+  const cols = proj.cols;
+  const rows = Math.ceil(proj.blocks / cols);
+  const W=680, H=380, pad=20, gap=10;
+  const bw = (W - pad*2 - gap*(cols-1)) / cols;
+  const bh = (H - pad*2 - gap*(rows-1) - 40) / rows; // 40 for labels
+
+  let html = '';
+  // Inverter sub-grid inside each block
+  const invPerBlock = 4;
+  const invCols = 2;
+
+  Object.entries(proj.data).forEach(([bname, bdata], idx) => {
+    const col = idx % cols;
+    const row = Math.floor(idx / cols);
+    const bx = pad + col*(bw+gap);
+    const by = pad + 28 + row*(bh+gap); // 28 for top label row
+
+    // Determine view
+    let pct;
+    if(viewKey==='overall') pct = blockOverallPct(bdata);
+    else if(viewKey==='civil') pct = sysPct(bdata,'Obras civiles');
+    else if(viewKey==='tracker') pct = sysPct(bdata,'Trackers / Mecánico');
+    else pct = electricPct(bdata);
+
+    const hasDesvio = blockHasDesvio(bdata);
+    const fill = pctColor(pct, hasDesvio);
+    const textFill = pct>=40 ? '#fff' : '#374151';
+    const isSelected = selectedBlock === bname && currentProject === projKey;
+
+    // Draw 4 inverter sub-cells
+    const iw = (bw-8)/invCols - 3;
+    const ih = (bh-24)/2 - 3;
+    let invHtml = '';
+    for(let i=0;i<invPerBlock;i++){
+      const ic = i%invCols, ir = Math.floor(i/invCols);
+      const ix = bx+4+ic*(iw+3), iy = by+20+ir*(ih+3);
+      const ipct = Math.max(0,Math.min(100,pct + stableOffset(`${projKey}-${bname}-${viewKey}-I${i+1}`)));
+      const ifill = pctColor(ipct, hasDesvio);
+      invHtml += `<rect x="${ix.toFixed(1)}" y="${iy.toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}" rx="3" fill="${ifill}" opacity="0.7"/>
+        <text x="${(ix+iw/2).toFixed(1)}" y="${(iy+ih/2+4).toFixed(1)}" text-anchor="middle" font-size="9" fill="#fff" font-family="DM Mono,monospace">I${i+1}</text>`;
+    }
+
+    html += `
+      <g class="block-g" onclick="selectBlock('${projKey}','${bname}')" style="cursor:pointer">
+        <rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" rx="8"
+          fill="${fill}" opacity="${isSelected?'1':'0.85'}"
+          stroke="${isSelected?'#fff':'transparent'}" stroke-width="${isSelected?'2.5':'0'}"
+          filter="${isSelected?'url(#shadow)':''}"/>
+        ${invHtml}
+        <text x="${(bx+bw/2).toFixed(1)}" y="${(by+13).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="600" fill="#fff" font-family="DM Sans,sans-serif">${bname}</text>
+        <text x="${(bx+bw-6).toFixed(1)}" y="${(by+13).toFixed(1)}" text-anchor="end" font-size="10" fill="rgba(255,255,255,.8)" font-family="DM Mono,monospace">${pct}%</text>
+      </g>`;
+  });
+
+  // Labels top
+  let topLabels = '';
+  for(let c=0;c<cols;c++){
+    const x = pad + c*(bw+gap) + bw/2;
+    topLabels += `<text x="${x.toFixed(1)}" y="16" text-anchor="middle" font-size="11" fill="#64748b" font-family="DM Sans,sans-serif" letter-spacing="1">ZONA ${String.fromCharCode(65+c)}</text>`;
+  }
+
+  svg.innerHTML = `
+    <defs>
+      <filter id="shadow"><feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="rgba(255,255,255,.4)"/></filter>
+    </defs>
+    ${topLabels}${html}`;
+}
+
+function selectBlock(projKey, bname){
+  selectedBlock = bname;
+  currentProject = projKey;
+  buildPark();
+  renderDetail(projKey, bname);
+}
+
+function renderDetail(projKey, bname){
+  const bdata = PROJECTS[projKey].data[bname];
+  const overall = blockOverallPct(bdata);
+
+  document.getElementById('detailTitle').textContent = `Bloque ${bname} — ${PROJECTS[projKey].label}`;
+  document.getElementById('detailSub').textContent = `Avance global: ${overall}%`;
+
+  let html = '';
+  SYSTEMS.forEach(sys => {
+    const sp = sysPct(bdata, sys);
+    const fillClass = sp>=80?'pg-green':sp>=40?'pg-amber':'pg-red';
+    html += `<div class="sys-row">
+      <div>
+        <div class="sys-name">${sys}</div>
+        <div style="margin-top:6px">`;
+    // Subsystem tasks
+    Object.entries(bdata[sys]).forEach(([sub, subdata]) => {
+      const subPct = subsystemPct(subdata);
+      html += `<div style="margin-bottom:8px">
+        <div style="font-size:12px;color:var(--gray);margin-bottom:4px;display:flex;justify-content:space-between;gap:8px">
+          <span>${sub}</span>
+          <span>${subdata.desvio ? '<span class="badge b-red">Desvío</span>' : `<span style="font-family:var(--mono)">${subPct}%</span>`}</span>
+        </div>
+        <div class="task-list">`;
+      subdata.tasks.forEach((t,ti) => {
+        const isLast = ti === subdata.tasks.length-1;
+        const prev3done = subdata.tasks.slice(0,3).every(x=>x.pct>=100);
+        let libHtml = '';
+        if(isLast){
+          if(t.libState==='locked'){ libHtml = `<button class="lib-btn lib-locked" disabled>🔒</button>`; }
+          else if(t.libState==='ready'){ libHtml = `<button class="lib-btn lib-ready" onclick="sendLib('${projKey}','${bname}','${sys}','${sub}',${ti})">Solicitar</button>`; }
+          else if(t.libState==='sent'){ libHtml = `<button class="lib-btn lib-sent">✓ Enviada</button>`; }
+        }
+        const pctDisp = isLast ? (prev3done?'Listo':'—') : t.pct+'%';
+        html += `<div class="task-item">
+          ${isLast ? '<span style="width:16px;text-align:center;color:var(--gray)">PIE</span>' : `<input type="checkbox" class="task-cb" ${t.pct>=100?'checked':''} onchange="toggleTask('${projKey}','${bname}','${sys}','${sub}',${ti},this)">`}
+          <span class="task-name">${t.name}</span>
+          <span style="font-family:var(--mono);font-size:11px;color:var(--gray);white-space:nowrap">${pctDisp}</span>
+          ${libHtml}
+        </div>`;
+      });
+      html += `</div></div>`;
+    });
+    html += `</div></div>
+      <div style="text-align:right">
+        <div class="pval" style="margin-bottom:4px">${sp}%</div>
+        <div class="pbar sys-bar"><div class="pfill ${fillClass}" style="width:${sp}%"></div></div>
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('detailBody').innerHTML = html;
+}
+
+function toggleTask(projKey, bname, sys, sub, ti, cb){
+  const task = PROJECTS[projKey].data[bname][sys][sub].tasks[ti];
+  task.pct = cb.checked ? 100 : 0;
+  // Check if prev 3 done → unlock lib button
+  const tasks = PROJECTS[projKey].data[bname][sys][sub].tasks;
+  const prev3 = tasks.slice(0,3).every(t=>t.pct>=100);
+  if(prev3 && tasks[3].libState==='locked') tasks[3].libState='ready';
+  if(!prev3 && tasks[3].libState!=='locked') tasks[3].libState='locked';
+  renderDetail(projKey, bname);
+  buildPark();
+  refreshAnalytics();
+}
+
+function sendLib(projKey, bname, sys, sub, ti){
+  PROJECTS[projKey].data[bname][sys][sub].tasks[ti].libState = 'sent';
+  renderDetail(projKey, bname);
+  buildPark();
+  refreshAnalytics();
+  showToast(`🔔 Solicitud de liberación enviada a Calidad\n${bname} · ${sub}`);
+}
+
+// ══════════════════════════════════════
+// STOCK
+// ══════════════════════════════════════
+const MINS = {
+  'Módulo FV 550W':10, 'Inversor 110kW':1, 'Cable solar 4mm²':500,
+  'Cable BT 95mm²':200, 'Cable MT 35mm²':100, 'Conector MC4':200, 'Componente tracker':50
+};
+let stockMov = [
+  {id:1,mat:'Módulo FV 550W',tipo:'Ingreso',qty:480,resp:'R. Pérez',fecha:'2025-02-10',motivo:''},
+  {id:2,mat:'Inversor 110kW',tipo:'Ingreso',qty:12,resp:'M. Soria',fecha:'2025-02-12',motivo:''},
+  {id:3,mat:'Cable solar 4mm²',tipo:'Ingreso',qty:8000,resp:'J. Díaz',fecha:'2025-02-14',motivo:''},
+  {id:4,mat:'Conector MC4',tipo:'Ingreso',qty:2400,resp:'M. Soria',fecha:'2025-02-15',motivo:''},
+  {id:5,mat:'Módulo FV 550W',tipo:'Egreso',qty:440,resp:'J. Díaz',fecha:'2025-03-01',motivo:''},
+  {id:6,mat:'Cable solar 4mm²',tipo:'Egreso',qty:7200,resp:'J. Díaz',fecha:'2025-03-05',motivo:''},
+  {id:7,mat:'Conector MC4',tipo:'Egreso',qty:2180,resp:'J. Díaz',fecha:'2025-03-08',motivo:''},
+  {id:8,mat:'Cable solar 4mm²',tipo:'Baja',qty:120,resp:'F. Quiroga',fecha:'2025-03-10',motivo:'Deterioro en campo'},
+  {id:9,mat:'Cable BT 95mm²',tipo:'Ingreso',qty:1200,resp:'R. Pérez',fecha:'2025-03-12',motivo:''},
+  {id:10,mat:'Cable MT 35mm²',tipo:'Ingreso',qty:600,resp:'R. Pérez',fecha:'2025-03-13',motivo:''},
+  {id:11,mat:'Cable BT 95mm²',tipo:'Egreso',qty:1100,resp:'J. Díaz',fecha:'2025-03-18',motivo:''},
+  {id:12,mat:'Componente tracker',tipo:'Ingreso',qty:320,resp:'M. Soria',fecha:'2025-03-20',motivo:''},
+  {id:13,mat:'Componente tracker',tipo:'Egreso',qty:290,resp:'J. Díaz',fecha:'2025-03-25',motivo:''},
+  {id:14,mat:'Módulo FV 550W',tipo:'Baja',qty:3,resp:'F. Quiroga',fecha:'2025-03-28',motivo:'Rotura en montaje'},
+];
+let nextStockId = 15;
+
+function calcBalance(){
+  const bal={};
+  stockMov.forEach(m=>{
+    if(!bal[m.mat]) bal[m.mat]=0;
+    if(m.tipo==='Ingreso') bal[m.mat]+=m.qty;
+    else bal[m.mat]-=m.qty;
+  });
+  return bal;
+}
+
+function renderStock(){
+  const tipo = document.getElementById('stockFilterTipo').value;
+  const q    = document.getElementById('stockSearch').value.toLowerCase();
+  const bal  = calcBalance();
+  const filtered = stockMov.filter(m=>(!tipo||m.tipo===tipo)&&(!q||m.mat.toLowerCase().includes(q)));
+  const tMap = {Ingreso:'b-blue',Egreso:'b-gray',Baja:'b-red'};
+  document.getElementById('stockBody').innerHTML = filtered.map(m=>{
+    const saldo = bal[m.mat];
+    const min   = MINS[m.mat]||0;
+    const stBadge = saldo<=min?'b-red':saldo<=min*2?'b-amber':'b-green';
+    const stLbl   = saldo<=min?'Crítico':saldo<=min*2?'Mínimo':'OK';
+    return `<tr>
+      <td><strong>${m.mat}</strong>${m.motivo?`<br><small style="color:var(--gray)">${m.motivo}</small>`:''}</td>
+      <td><span class="badge ${tMap[m.tipo]}">${m.tipo}</span></td>
+      <td style="text-align:right;font-family:var(--mono)">${m.qty.toLocaleString('es-AR')}</td>
+      <td style="font-family:var(--mono)">${saldo.toLocaleString('es-AR')}</td>
+      <td><span class="badge ${stBadge}">${stLbl}</span></td>
+      <td style="font-size:12px;color:var(--gray)">${m.resp}</td>
+      <td style="font-size:12px;color:var(--gray)">${m.fecha}</td>
+    </tr>`;
+  }).join('');
+
+  // KPIs
+  const totIn  = stockMov.filter(m=>m.tipo==='Ingreso').reduce((a,m)=>a+m.qty,0);
+  const totEg  = stockMov.filter(m=>m.tipo==='Egreso').reduce((a,m)=>a+m.qty,0);
+  const totBaj = stockMov.filter(m=>m.tipo==='Baja').reduce((a,m)=>a+m.qty,0);
+  const alerts = Object.entries(bal).filter(([k,v])=>v<=MINS[k]).length;
+  document.getElementById('stockKPIs').innerHTML = [
+    {v:stockMov.length,l:'Movimientos',c:'#0f172a'},
+    {v:totIn.toLocaleString('es-AR'),l:'Unidades ingresadas',c:'#1d4ed8'},
+    {v:totEg.toLocaleString('es-AR'),l:'Unidades egresadas',c:'#475569'},
+    {v:totBaj.toLocaleString('es-AR'),l:'Unidades de baja',c:'#dc2626'},
+    {v:alerts,l:'Alertas activas',c:'#d97706'},
+  ].map(k=>`<div class="kpi-card"><div class="kpi-v" style="color:${k.c}">${k.v}</div><div class="kpi-l">${k.l}</div></div>`).join('');
+
+  // Bars
+  document.getElementById('stockBars').innerHTML = Object.entries(bal).map(([mat,qty])=>{
+    const min=MINS[mat]||1;
+    const maxV=Math.max(qty,min)*1.5;
+    const w=Math.min(100,Math.round((qty/maxV)*100));
+    const col=qty<=min?'var(--red)':qty<=min*2?'var(--amber)':'var(--green)';
+    return `<div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
+        <span>${mat}</span>
+        <span style="font-family:var(--mono);color:var(--gray)">${qty.toLocaleString('es-AR')} / mín ${min.toLocaleString('es-AR')}</span>
+      </div>
+      <div class="pbar" style="height:8px"><div class="pfill" style="width:${w}%;background:${col}"></div></div>
+    </div>`;
+  }).join('');
+
+  // Alertas
+  const alertItems = Object.entries(bal).filter(([k,v])=>v<=(MINS[k]||0)*2);
+  document.getElementById('alertas').innerHTML = alertItems.length
+    ? alertItems.map(([k,v])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f1f5f9;font-size:13px">
+        <span>${k}</span>
+        <span class="badge ${v<=(MINS[k]||0)?'b-red':'b-amber'}">${v} uds</span>
+      </div>`).join('')
+    : '<p style="font-size:13px;color:var(--gray)">Sin alertas activas ✓</p>';
+}
+
+function toggleMotivo(){
+  document.getElementById('motivoRow').style.display =
+    document.getElementById('inTipo').value==='Baja'?'':'none';
+}
+
+function addStock(){
+  const mat  = document.getElementById('inMat').value;
+  const tipo = document.getElementById('inTipo').value;
+  const qty  = parseInt(document.getElementById('inQty').value);
+  const resp = document.getElementById('inResp').value.trim();
+  const mot  = document.getElementById('inMotivo').value.trim();
+  if(!qty||qty<=0||!resp){ showToast('Completá cantidad y responsable'); return; }
+  stockMov.unshift({id:nextStockId++,mat,tipo,qty,resp,
+    fecha:new Date().toISOString().split('T')[0],motivo:mot});
+  document.getElementById('inQty').value='';
+  document.getElementById('inResp').value='';
+  document.getElementById('inMotivo').value='';
+  renderStock();
+  showToast(`✓ ${tipo} registrado — ${mat} (${qty.toLocaleString('es-AR')} uds.)`);
+}
+
+// ══════════════════════════════════════
+// ANALYTICS
+// ══════════════════════════════════════
+function buildAnalyticsKPIs(){
+  let totalTasks=0, doneTasks=0;
+  Object.values(PROJECTS).forEach(proj=>{
+    Object.values(proj.data).forEach(bdata=>{
+      SYSTEMS.forEach(sys=>{
+        Object.values(bdata[sys]).forEach(sub=>{
+          sub.tasks.slice(0,3).forEach(t=>{ totalTasks++; if(t.pct>=100) doneTasks++; });
+        });
+      });
+    });
+  });
+  const avPALO = Object.values(PROJECTS.PALO.data).map(b=>blockOverallPct(b));
+  const globalAv = Math.round(avPALO.reduce((a,b)=>a+b,0)/avPALO.length);
+  document.getElementById('analyticsKPIs').innerHTML = [
+    {v:'3',l:'Proyectos activos',c:'#0f172a'},
+    {v:globalAv+'%',l:'Avance global PALO',c:'#16a34a'},
+    {v:doneTasks,l:'Tareas completadas',c:'#2563eb'},
+    {v:totalTasks-doneTasks,l:'Tareas pendientes',c:'#d97706'},
+  ].map(k=>`<div class="kpi-card"><div class="kpi-v" style="color:${k.c}">${k.v}</div><div class="kpi-l">${k.l}</div></div>`).join('');
+}
+
+let chartSistemas, chartSemanal, chartHallazgos;
+function buildCharts(){
+  if(chartSistemas) chartSistemas.destroy();
+  if(chartSemanal) chartSemanal.destroy();
+  if(chartHallazgos) chartHallazgos.destroy();
+  // 1. Avance por sistema PALO
+  const sisPcts = SYSTEMS.map(sys=>{
+    const vals = Object.values(PROJECTS.PALO.data).flatMap(b=>Object.values(b[sys]).map(s=>subsystemPct(s)));
+    return Math.round(vals.reduce((a,b)=>a+b,0)/vals.length);
+  });
+  const ctx1 = document.getElementById('chartSistemas').getContext('2d');
+  chartSistemas = new Chart(ctx1,{
+    type:'bar',
+    data:{
+      labels:['Obras civiles','Trackers','Eléc. BT','Eléc. MT'],
+      datasets:[{data:sisPcts,backgroundColor:sisPcts.map(p=>p>=80?'#16a34a':p>=40?'#d97706':'#dc2626'),borderRadius:6}]
+    },
+    options:{plugins:{legend:{display:false}},scales:{y:{max:100,ticks:{callback:v=>v+'%'},grid:{color:'#f1f5f9'}},x:{grid:{display:false}}},responsive:true}
+  });
+
+  // 2. Evolución semanal
+  const weeks = ['Sem 1','Sem 2','Sem 3','Sem 4','Sem 5','Sem 6','Sem 7','Sem 8'];
+  const currentPalo = Math.round(Object.values(PROJECTS.PALO.data).map(b=>blockOverallPct(b)).reduce((a,b)=>a+b,0)/Object.values(PROJECTS.PALO.data).length);
+  const semData = [8,14,22,31,40,49,57,currentPalo];
+  const ctx2 = document.getElementById('chartSemanal').getContext('2d');
+  chartSemanal = new Chart(ctx2,{
+    type:'line',
+    data:{
+      labels:weeks,
+      datasets:[{label:'Avance %',data:semData,borderColor:'#16a34a',backgroundColor:'rgba(22,163,74,.08)',fill:true,tension:.4,pointBackgroundColor:'#16a34a'}]
+    },
+    options:{plugins:{legend:{display:false}},scales:{y:{max:100,ticks:{callback:v=>v+'%'},grid:{color:'#f1f5f9'}},x:{grid:{display:false}}},responsive:true}
+  });
+
+  // 3. Hallazgos
+  const ctx3 = document.getElementById('chartHallazgos').getContext('2d');
+  chartHallazgos = new Chart(ctx3,{
+    type:'doughnut',
+    data:{
+      labels:['Observación','No conformidad','Oportunidad mejora','Cerrado'],
+      datasets:[{data:[18,7,12,43],backgroundColor:['#d97706','#dc2626','#2563eb','#16a34a'],hoverOffset:4,borderWidth:2}]
+    },
+    options:{plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:12}}},responsive:true,cutout:'60%'}
+  });
+
+  // 4. Block table
+  document.getElementById('blockTable').innerHTML = `
+    <table>
+      <thead><tr><th>Proyecto</th><th>Bloque</th><th>Avance</th><th></th></tr></thead>
+      <tbody>
+        ${Object.entries(PROJECTS).flatMap(([pk,proj])=>
+          Object.entries(proj.data).map(([bn,bd])=>{
+            const pct=blockOverallPct(bd);
+            const fill=pct>=80?'pg-green':pct>=40?'pg-amber':'pg-red';
+            return `<tr>
+              <td><span class="badge b-gray">${pk}</span></td>
+              <td style="font-weight:500">${bn}</td>
+              <td><div style="display:flex;align-items:center;gap:8px"><div class="pbar" style="width:80px"><div class="pfill ${fill}" style="width:${pct}%"></div></div><span class="pval">${pct}%</span></div></td>
+              <td><button class="btn btn-sm btn-ghost" onclick="selectBlock('${pk}','${bn}');document.getElementById('parque').scrollIntoView({behavior:'smooth'})">Ver</button></td>
+            </tr>`;
+          })
+        ).join('')}
+      </tbody>
+    </table>`;
+}
+
+function refreshAnalytics(){
+  buildAnalyticsKPIs();
+  buildCharts();
+}
+
+// ══════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════
+let toastT;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastT);
+  toastT=setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+selectBlock('PALO','B1');
+renderStock();
+buildAnalyticsKPIs();
+buildCharts();
+
+// Animate progress bars on scroll
+const io = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{ if(e.isIntersecting) e.target.querySelectorAll('.pfill[style*="width"]').forEach(b=>{ const w=b.style.width; b.style.width='0'; setTimeout(()=>b.style.width=w,50); }); });
+},{threshold:.15});
+document.querySelectorAll('.card,.park-map-wrap').forEach(el=>io.observe(el));
+
+// Nav active state
+const sections = document.querySelectorAll('section');
+const navLinks = document.querySelectorAll('nav a');
+window.addEventListener('scroll',()=>{
+  let cur='';
+  sections.forEach(s=>{ if(window.scrollY>=s.offsetTop-80) cur=s.id; });
+  navLinks.forEach(a=>{ a.classList.toggle('active', a.getAttribute('href')==='#'+cur); });
+},{passive:true});
+</script>
+</body>
+</html>
